@@ -3,6 +3,5 @@ WORKDIR /app
 COPY . .
 RUN chmod +x gradlew
 RUN ./gradlew build -x test
-RUN ls build/libs/
 EXPOSE 8080
-CMD ["sh", "-c", "java -jar build/libs/*.jar"]
+CMD ["java", "-jar", "build/libs/Todo-0.0.1-SNAPSHOT.jar"]
