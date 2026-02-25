@@ -1,0 +1,31 @@
+package com.example.Todo.controller
+
+import com.example.Todo.dto.AuthResponse
+import com.example.Todo.dto.LoginRequest
+import com.example.Todo.dto.RefreshRequest
+import com.example.Todo.dto.RegisterRequest
+import com.example.Todo.service.AuthService
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+
+@RestController
+@RequestMapping("/api/auth")
+class AuthController(
+    private val authService: AuthService
+) {
+
+    @PostMapping("/register")
+    fun register(@RequestBody request: RegisterRequest): ResponseEntity<AuthResponse> {
+        return ResponseEntity.ok(authService.register(request))
+    }
+
+    @PostMapping("/login")
+    fun login(@RequestBody request: LoginRequest): ResponseEntity<AuthResponse> {
+        return ResponseEntity.ok(authService.login(request))
+    }
+
+    @PostMapping("/refresh")
+    fun refresh(@RequestBody request: RefreshRequest): ResponseEntity<AuthResponse> {
+        return ResponseEntity.ok(authService.refresh(request))
+    }
+}
