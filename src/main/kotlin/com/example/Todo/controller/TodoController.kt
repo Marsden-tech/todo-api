@@ -3,6 +3,7 @@ package com.example.Todo.controller
 import com.example.Todo.dto.TodoRequest
 import com.example.Todo.dto.TodoResponse
 import com.example.Todo.service.TodoService
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -17,11 +18,11 @@ class TodoController(
         ResponseEntity.ok(todoService.getAllTodos())
 
     @PostMapping
-    fun create(@RequestBody request: TodoRequest): ResponseEntity<TodoResponse> =
+    fun create(@Valid @RequestBody request: TodoRequest): ResponseEntity<TodoResponse> =
         ResponseEntity.ok(todoService.createTodo(request))
 
     @PutMapping("/{id}")
-    fun update(@PathVariable id: Long, @RequestBody request: TodoRequest): ResponseEntity<TodoResponse> =
+    fun update(@PathVariable id: Long, @Valid @RequestBody request: TodoRequest): ResponseEntity<TodoResponse> =
         ResponseEntity.ok(todoService.updateTodo(id, request))
 
     @DeleteMapping("/{id}")

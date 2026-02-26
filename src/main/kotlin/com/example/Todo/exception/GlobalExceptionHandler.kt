@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.bind.MethodArgumentNotValidException
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -94,6 +95,23 @@ class GlobalExceptionHandler {
                 status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 error = "Internal Server Error",
                 message = ex.message ?: "An unexpected error occurred",
+                path = request.requestURI
+            )
+        )
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleValidationException(
+        ex: MethodArgumentNotValidException,
+        request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+        val errors = ex.bindingResult.fieldErrors
+            .joinToString(", ") { "${it.field}: ${it.defaultMessage}" }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            ErrorResponse(
+                status = HttpStatus.BAD_REQUEST.value(),
+                error = "Validation Failed",
+                message = errors,
                 path = request.requestURI
             )
         )

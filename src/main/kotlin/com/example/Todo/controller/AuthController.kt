@@ -5,6 +5,7 @@ import com.example.Todo.dto.LoginRequest
 import com.example.Todo.dto.RefreshRequest
 import com.example.Todo.dto.RegisterRequest
 import com.example.Todo.service.AuthService
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -15,12 +16,12 @@ class AuthController(
 ) {
 
     @PostMapping("/register")
-    fun register(@RequestBody request: RegisterRequest): ResponseEntity<AuthResponse> {
+    fun register(@Valid @RequestBody request: RegisterRequest): ResponseEntity<AuthResponse> {
         return ResponseEntity.ok(authService.register(request))
     }
 
     @PostMapping("/login")
-    fun login(@RequestBody request: LoginRequest): ResponseEntity<AuthResponse> {
+    fun login(@Valid @RequestBody request: LoginRequest): ResponseEntity<AuthResponse> {
         return ResponseEntity.ok(authService.login(request))
     }
 
