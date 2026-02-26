@@ -7,6 +7,7 @@ import com.example.Todo.dto.RegisterRequest
 import com.example.Todo.service.AuthService
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -28,5 +29,12 @@ class AuthController(
     @PostMapping("/refresh")
     fun refresh(@RequestBody request: RefreshRequest): ResponseEntity<AuthResponse> {
         return ResponseEntity.ok(authService.refresh(request))
+    }
+
+    @PostMapping("/logout")
+    fun logout(): ResponseEntity<Void> {
+        val username = SecurityContextHolder.getContext().authentication!!.name
+        authService.logout(username)
+        return ResponseEntity.noContent().build()
     }
 }

@@ -76,4 +76,10 @@ class AuthService(
             role = user.role.name
         )
     }
+
+    fun logout(username: String) {
+        val user = userRepository.findByUsername(username)
+            ?: throw UserNotFoundException("User not found")
+        refreshTokenService.deleteByUser(user)
+    }
 }
