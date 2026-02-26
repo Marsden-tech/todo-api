@@ -5,8 +5,12 @@ import com.example.Todo.dto.LoginRequest
 import com.example.Todo.dto.RefreshRequest
 import com.example.Todo.dto.RegisterRequest
 import com.example.Todo.entity.User
+import com.example.Todo.exception.InvalidCredentialsException
+import com.example.Todo.exception.UserAlreadyExistsException
+import com.example.Todo.exception.UserNotFoundException
 import com.example.Todo.repository.UserRepository
 import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -21,6 +25,9 @@ class AuthService(
 ) {
 
     fun register(request: RegisterRequest): AuthResponse {
+        if (userRepository.findByUsername(request.username) != null) {
+            throw UserAlreadyExistsException("Username '${request.username}' is already taken")
+        }
         val user = User(
             username = request.username,
             password = encoder.encode(request.password)!!,
@@ -38,11 +45,15 @@ class AuthService(
     }
 
     fun login(request: LoginRequest): AuthResponse {
-        authenticationManager.authenticate(
-            UsernamePasswordAuthenticationToken(request.username, request.password)
-        )
+        try {
+            authenticationManager.authenticate(
+                UsernamePasswordAuthenticationToken(request.username, request.password)
+            )
+        } catch (e: BadCredentialsException) {
+            throw InvalidCredentialsException("Invalid username or password")
+        }
         val user = userRepository.findByUsername(request.username)
-            ?: throw RuntimeException("User not found")
+            ?: throw UserNotFoundException("User not found: ${request.username}")
         val accessToken = jwtService.generateToken(user)
         val refreshToken = refreshTokenService.createRefreshToken(user)
         return AuthResponse(
@@ -54,15 +65,15 @@ class AuthService(
 
     fun refresh(request: RefreshRequest): AuthResponse {
         val refreshToken = refreshTokenService.findByToken(request.refreshToken)
-            ?: throw RuntimeException("Refresh token not found")
+            ?: throw UserNotFoundException("Refresh token not found")
         refreshTokenService.verifyExpiration(refreshToken)
-        val user = refreshToken.user ?: throw RuntimeException("User not found")
+        val user = refreshToken.user ?: throw UserNotFoundException("User not found")
         val newAccessToken = jwtService.generateToken(user)
         val newRefreshToken = refreshTokenService.createRefreshToken(user)
         return AuthResponse(
             accessToken = newAccessToken,
             refreshToken = newRefreshToken.token,
-            role = user!!.role.name
+            role = user.role.name
         )
     }
 }
